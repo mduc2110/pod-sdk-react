@@ -14,6 +14,50 @@ pnpm add @pod/sdk
 
 ## Quick Start
 
+### 0. Load bridge.js
+
+**Important:** You must load `bridge.js` in your HTML before your React app. The bridge.js file is included in the SDK package.
+
+#### Option 1: Copy bridge.js to your public folder
+
+```bash
+# Copy bridge.js from node_modules to your public folder
+cp node_modules/@pod/sdk/bridge.js public/bridge.js
+```
+
+Then include it in your HTML:
+
+```html
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>My App</title>
+  </head>
+  <body>
+    <!-- Load bridge.js BEFORE React app -->
+    <script src="/bridge.js"></script>
+    <div id="root"></div>
+    <script type="module" src="/main.tsx"></script>
+  </body>
+</html>
+```
+
+#### Option 2: Import in your entry file
+
+```typescript
+// main.tsx or index.tsx
+import '@pod/sdk/bridge.js';
+import React from 'react';
+import ReactDOM from 'react-dom/client';
+import App from './App';
+
+ReactDOM.createRoot(document.getElementById('root')!).render(
+  <React.StrictMode>
+    <App />
+  </React.StrictMode>
+);
+```
+
 ### 1. Wrap your app with PodSDKProvider
 
 ```tsx
@@ -207,10 +251,29 @@ npm run type-check
 npm run dev
 ```
 
+## How It Works
+
+The SDK requires `bridge.js` to be loaded by your web app. Here's the communication flow:
+
+1. **Native App** provides `window.PodBridge.postMessage()` (created by iOS/Android WebView)
+2. **bridge.js** (loaded by web app) creates `window.Pod.WebView` using `window.PodBridge`
+3. **React SDK** (`@pod/sdk`) detects and uses `window.Pod.WebView` to communicate with native
+
+```
+Native App (window.PodBridge)
+    ↓
+bridge.js (creates window.Pod.WebView)
+    ↓
+React SDK (uses window.Pod.WebView)
+```
+
+**Note:** `bridge.js` is included in the SDK package and must be loaded by your web application before your React app initializes.
+
 ## Requirements
 
 - React >= 16.8.0
 - React DOM >= 16.8.0
+- Native iOS/Android app must provide `window.PodBridge.postMessage()`
 
 ## License
 

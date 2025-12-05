@@ -15,15 +15,25 @@ export const PodSDKProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   // Check if bridge is available
   useEffect(() => {
     const checkAvailability = () => {
-      const available = !!(
+      // Check for Pod.WebView (preferred, created by bridge.js)
+      const hasPodWebView = !!(
+        typeof window !== 'undefined' &&
+        window.Pod?.WebView?.postEvent &&
+        typeof window.Pod.WebView.postEvent === 'function'
+      );
+      
+      // Check for PodBridge (legacy, should be provided by native)
+      const hasPodBridge = !!(
         typeof window !== 'undefined' &&
         window.PodBridge &&
         typeof window.PodBridge.postMessage === 'function'
       );
+
+      const available = hasPodWebView || hasPodBridge;
       setIsAvailable(available);
       
       if (available) {
-        console.log('[PodSDK] Bridge available');
+        console.log('[PodSDK] Bridge available', hasPodWebView ? '(Pod.WebView)' : '(PodBridge)');
       } else {
         console.warn('[PodSDK] Bridge not available - running in browser without native container');
       }

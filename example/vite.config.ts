@@ -13,5 +13,6 @@ export default defineConfig({
       '@pod/sdk': path.resolve(__dirname, '../src'),
     },
   },
+  publicDir: '.', // Serve files from example directory
 });
 
